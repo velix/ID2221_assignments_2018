@@ -70,26 +70,18 @@ public class TopTen {
 
 					context.write(NullWritable.get(), value);
 				}
-			} else {
-				LOG.info("Empty user row map in mapper");
 			}
-
 		}
 
 		protected void cleanup(Context context) throws IOException, InterruptedException {
 			// Output our ten records to the reducers with a null key
 			int count = 0;
 
-			LOG.info("In cleanup repToRecordMap is: "+ repToRecordMap.size());
-
 			for (Map.Entry<Integer, Text> entry: repToRecordMap.descendingMap().entrySet()) {
 				if(count >= 10) break;
-				
-				LOG.info("Mapper emitting: "+entry.getValue().toString().length());
-				context.write(NullWritable.get(), entry.getValue());
 
+				context.write(NullWritable.get(), entry.getValue());
 				count++;
-				LOG.info("---------------------------------");
 			}
 		}
 	}
@@ -103,10 +95,8 @@ public class TopTen {
 		public void reduce(NullWritable key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
 			for (Text t : values) {
-				LOG.info("++++++++++++++++++++++++++++++");
 				String s = t.toString();
 				Map<String, String> userRow = transformXmlToMap(s);
-				LOG.info("userRow is: "+userRow.size());
 				
 				if (!userRow.isEmpty()) {
 					if (userRow.containsKey("Id") && userRow.containsKey("Reputation")) {
@@ -115,12 +105,7 @@ public class TopTen {
 						Text userId = new Text(userRow.get("Id"));
 						
 						repToRecordMap.put(userRep, userId);
-					} else {
-						LOG.info("Null values in reducer input. BAD");
 					}
-
-				} else {
-					LOG.info("Empty user row map in reducer");
 				}
 
 			}
