@@ -67,7 +67,7 @@ public class TopTen {
 	
 					Integer userRep = Integer.parseInt(s_userRep);
 					repToRecordMap.put(userRep, value);
-					// LOG.info("Mapper adding for cleanup: "+value.toString().length());
+
 					context.write(NullWritable.get(), value);
 				}
 			} else {
