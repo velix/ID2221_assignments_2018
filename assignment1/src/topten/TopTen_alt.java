@@ -26,7 +26,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.hbase.mapreduce.TableReducer;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+//import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 
 public class TopTen_alt {
@@ -87,9 +87,24 @@ public class TopTen_alt {
 			}
 			// Extract Top 10 records and write to result
 			for (int i = 0; i < 10; i++) {
-				Entry<Integer, org.apache.hadoop.io.Text> entry = repToRecordMap.pollLastEntry();
-				Put insHBase = new Put(entry.getValue().getBytes());
-				context.write(NullWritable.get(), insHBase);
+				try {
+					Entry<Integer, org.apache.hadoop.io.Text> entry = repToRecordMap.pollLastEntry();
+					/*
+					Put insHBase = new Put(entry.getValue().getBytes());
+					insHBase.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("sum"), Bytes.toBytes(sum));
+					context.write(NullWritable.get(), insHBase);
+					 */
+					// create hbase put with rowkey as date
+					Put insHBase = new Put(entry.getValue().getBytes());
+
+					// insert sum value to hbase 
+					insHBase.addColumn(Bytes.toBytes("info"), Bytes.toBytes("data"), entry.getValue().getBytes());
+
+					// write data to Hbase table
+					context.write(null, insHBase);
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -104,12 +119,22 @@ public class TopTen_alt {
 		job.setReducerClass(TopTenReducer.class);
 		job.setNumReduceTasks(1);
 
-		job.setOutputKeyClass(NullWritable.class);
+		job.setOutputKeyClass(org.apache.hadoop.io.NullWritable.class);
 		job.setOutputValueClass(org.apache.hadoop.io.Text.class);
+
+		job.setMapOutputKeyClass(org.apache.hadoop.io.NullWritable.class);
+		job.setMapOutputValueClass(Text.class);
 
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
+		// define scan and define column families to scan
+		Scan scan = new Scan();
+		scan.addFamily(Bytes.toBytes("info"));
+
+		// define input hbase table
+		TableMapReduceUtil.initTableReducerJob("topten", TopTenReducer.class, job);
+
+		job.waitForCompletion(true);
 	}
 }
