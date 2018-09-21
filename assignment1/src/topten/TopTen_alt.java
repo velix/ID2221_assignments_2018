@@ -29,7 +29,7 @@ import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 
-public class TopTen {
+public class TopTen_alt {
 	// This helper function parses the stackoverflow into a Map for us.
 	public static Map<String, String> transformXmlToMap(String xml) {
 		Map<String, String> map = new HashMap<String, String>();

@@ -52,7 +52,7 @@ public class HBaseMapReduce {
 				}
 
 				// create hbase put with rowkey as date
-				Put insHBase = new Put(key.getBytes());
+				Put insHBase = new Put(Bytes.toBytes(key.getBytes()));
 
 				// insert sum value to hbase 
 				insHBase.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("sum"), Bytes.toBytes(sum));
