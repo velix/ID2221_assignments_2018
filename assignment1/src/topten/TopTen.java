@@ -94,9 +94,8 @@ public class TopTen {
 
 		public void reduce(NullWritable key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
-			for (Text t : values) {
-				String s = t.toString();
-				Map<String, String> userRow = transformXmlToMap(s);
+			for (Text recordRow : values) {
+				Map<String, String> userRow = transformXmlToMap(recordRow.toString());
 				
 				if (!userRow.isEmpty()) {
 					if (userRow.containsKey("Id") && userRow.containsKey("Reputation")) {
@@ -115,7 +114,7 @@ public class TopTen {
 				if(count >= 10) break;
 
 				Integer userRep = entry.getKey();
-				Text userId = new Text(entry.getValue());
+				Text userId = entry.getValue();
 
 				Put insHBase = new Put(Bytes.toBytes(count));
 				insHBase.addColumn(Bytes.toBytes("info"), Bytes.toBytes("rep"), Bytes.toBytes(userRep.toString()));
@@ -125,7 +124,6 @@ public class TopTen {
 				count++;
 			}
 
-			// context.write(NullWritable.get());
 		}
 	}
 
