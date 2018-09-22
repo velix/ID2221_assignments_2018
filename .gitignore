@@ -1,3 +1,4 @@
-**/src/.vscode/
-**/src/**/.vscode/
+**/**/src/.vscode/
+**/**/src/**/.vscode/
 assignment1/src/*_classes
+**/*.zip
